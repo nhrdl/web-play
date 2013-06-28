@@ -1,4 +1,6 @@
 from gi.repository import GLib
+from gi.repository import GObject
+from threading import Event
 import time
 
 class Driver(object):
@@ -21,13 +23,25 @@ class Driver(object):
         self.frameList = [];
         self.view.connect("navigation-policy-decision-requested", self.navigate)
         self.view.connect("script-alert", self.alert)
+        self.functionWaitEvent = Event()
          
-    def _get_page(self, url):
+    def _get_page(self, args):
+        url = args["url"]
         self.view.open(url)
+
+    def informer_run(self, func, args):
+        func(args)
+        self.functionWaitEvent.set()
         return False
+    
+    def run_func(self, func, **args):
         
+        GLib.idle_add(self.informer_run, func, args)
+        self.functionWaitEvent.wait(3*60)
+                
     def get_page(self, url):
-        GLib.idle_add(self._get_page, url)
+        self.run_func(self._get_page, url=url)
+        
     
     def allFramesLoaded(self):
         isLoaded = True

@@ -1,9 +1,10 @@
 from gi.repository import WebKit
 from gi.repository import Gtk
 from gi.repository import GLib
-
+from gi.repository import GObject
 from Config import Config
 from examples.eBay import eBayScript
+from threading import Thread
 
 class PyPlay:
    
@@ -62,12 +63,17 @@ class PyPlay:
         win.maximize()
         self.window = win
         #self.view.connect("context-menu", self.displayContextMenu)
-        
-
 
 app = PyPlay()
+        
+class Runner(Thread):
+    def run(self):
+        run = eBayScript(app.view)
+        run.doIt()
 
-run = eBayScript(app.view)
-GLib.idle_add(run.doIt)
+GObject.threads_init()
+
+runner = Runner()
+runner.start()
 
 Gtk.main()
