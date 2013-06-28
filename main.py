@@ -1,9 +1,9 @@
-from gi.repository import WebKit 
-from gi.repository import Gtk 
-from gi.repository import GLib, GObject
+from gi.repository import WebKit
+from gi.repository import Gtk
+from gi.repository import GLib
 
 from Config import Config
-from eBay import eBayScript
+from examples.eBay import eBayScript
 
 class PyPlay:
    

@@ -32,6 +32,9 @@ class Driver(object):
     def allFramesLoaded(self):
         isLoaded = True
         for frame in self.frameList:
+            if (frame.get_uri() == "about:blank"):
+                continue
+             
             if (frame.get_document().get_state() != "complete"):
                 isLoaded = False
         
@@ -44,6 +47,7 @@ class Driver(object):
                 return
             
             time.sleep(1)
+            
     def wait_until_xpath(self, query):
         pass
        
