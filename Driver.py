@@ -49,7 +49,7 @@ class Driver(object):
             if (frame.get_uri() == "about:blank"):
                 continue
              
-            if (frame.get_document().get_state() != "complete"):
+            if (frame.get_dom_document().get_state() != "complete"):
                 isLoaded = False
         
         return isLoaded
@@ -61,8 +61,18 @@ class Driver(object):
                 return
             
             time.sleep(1)
-            
+    
+    def _get_xpath_results(self, args):
+        query = args["query"]
+        print query
+        
+    def get_xpath_results(self, query):
+        self.run_func(self._get_xpath_results, query=query)
+                
     def wait_until_xpath(self, query):
+        
+        result = self.get_xpath_results(query)
+        print result
         pass
        
     def wait_until_text(self, text):
