@@ -117,7 +117,7 @@ class Driver(object):
         print "Query ptr", queryPtr
         print "Query is ", query
         resolver = domDoc.create_ns_resolver(domDoc)
-        result = func(hash(domDoc), queryPtr, 0, 0, 7, 0, hash(err))
+        result = func(hash(domDoc), queryPtr, domDoc, 0, 7, 0, hash(err))
         print err
         obj = capi.pygobject_new(result)
         self.lastResult = obj
