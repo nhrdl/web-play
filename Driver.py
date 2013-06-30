@@ -57,7 +57,7 @@ class Driver(object):
         self.view.connect("navigation-policy-decision-requested", self.navigate)
         self.view.connect("script-alert", self.alert)
         self.functionWaitEvent = Event()
-        self.libWebKit = CDLL("libwebkitgtk-3.0.so")
+        self.libWebKit = CDLL("libwebkitgtk-3.0.so.0")
          
     def _get_page(self, args):
         url = args["url"]
@@ -101,18 +101,24 @@ class Driver(object):
     
     def _get_xpath_results(self, args):
         self.lastResult = None
-        query = args["query"]
-        print "Query is ", query
-        queryPtr = ctypes.create_string_buffer(query)
-        print "Query ptr", queryPtr
-        func = self.libWebKit.webkit_dom_document_evaluate
-        
         domDoc = self.getDocument()
         if (None == domDoc):
             return
-#        inResult = WebKit.DOMXPathResult()
+        print domDoc.get_ready_state()
+        if (domDoc.get_ready_state() != "complete"):
+            return
+        
+        
+        query = args["query"]
+        queryPtr = ctypes.create_string_buffer(query)
+        func = self.libWebKit.webkit_dom_document_evaluate
+        
+        err = GLib.GError()
+        print "Query ptr", queryPtr
+        print "Query is ", query
         resolver = domDoc.create_ns_resolver(domDoc)
-        result = func(hash(domDoc), queryPtr, hash(domDoc), hash(resolver), 7, 0, 0)
+        result = func(hash(domDoc), queryPtr, 0, 0, 7, 0, hash(err))
+        print err
         obj = capi.pygobject_new(result)
         self.lastResult = obj
         print obj
