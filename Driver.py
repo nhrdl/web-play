@@ -100,34 +100,37 @@ class Driver(object):
         return self.view.get_dom_document()
     
     def _get_xpath_results(self, args):
+        self.lastResult = None
         query = args["query"]
-        qstr = ctypes.c_char_p(query)
+        print "Query is ", query
+        queryPtr = ctypes.create_string_buffer(query)
+        print "Query ptr", queryPtr
         func = self.libWebKit.webkit_dom_document_evaluate
         
         domDoc = self.getDocument()
+        if (None == domDoc):
+            return
 #        inResult = WebKit.DOMXPathResult()
         resolver = domDoc.create_ns_resolver(domDoc)
-        result = func(hash(domDoc), qstr, hash(domDoc), hash(resolver), 7, None, None)
+        result = func(hash(domDoc), queryPtr, hash(domDoc), hash(resolver), 7, 0, 0)
         obj = capi.pygobject_new(result)
+        self.lastResult = obj
         print obj
-#         expr = domDoc.create_expression(query, resolver)
-#         expr.evaluate(domDoc, 7, None)
-#         result = domDoc.evaluate(query, domDoc, resolver, 7, None)
-#         self.lastResult =  result
-        print query
         
     def get_xpath_results(self, query):
         self.run_func(self._get_xpath_results, query=query)
         return self.lastResult
                 
     def wait_until_xpath(self, query):
-        
         result = self.get_xpath_results(query)
-        while(result == None):
+        
+        while(result == None or result.get_snapshot_length() == 0):
             time.sleep(1)
             result = self.get_xpath_results(query)
             
         print result
+        print result.get_snapshot_length()
+        
         pass
        
     def wait_until_text(self, text):
