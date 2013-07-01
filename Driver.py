@@ -112,13 +112,16 @@ class Driver(object):
         query = args["query"]
         queryPtr = ctypes.create_string_buffer(query)
         func = self.libWebKit.webkit_dom_document_evaluate
-        
-        err = GLib.GError()
+        class GError(ctypes.Structure):
+            _fields_ = [('domain', ctypes.c_int32),
+                        ('code', ctypes.c_int),
+                        ('message', ctypes.c_char_p)]
+            
+        self.err = ctypes.POINTER(GError)()
         print "Query ptr", queryPtr
         print "Query is ", query
         resolver = domDoc.create_ns_resolver(domDoc)
-        result = func(hash(domDoc), queryPtr, domDoc, 0, 7, 0, hash(err))
-        print err
+        result = func(hash(domDoc), queryPtr, hash(domDoc), hash(resolver), 7, 0, ctypes.byref(self.err))
         obj = capi.pygobject_new(result)
         self.lastResult = obj
         print obj
@@ -128,14 +131,16 @@ class Driver(object):
         return self.lastResult
                 
     def wait_until_xpath(self, query):
+        
         result = self.get_xpath_results(query)
+        print "One, ", result
         
         while(result == None or result.get_snapshot_length() == 0):
             time.sleep(1)
             result = self.get_xpath_results(query)
             
-        print result
-        print result.get_snapshot_length()
+        print "Result ", result
+        print "Length ", result.get_snapshot_length()
         
         pass
        
