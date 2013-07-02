@@ -110,17 +110,8 @@ class Driver(object):
         
         
         query = args["query"]
-        queryPtr = ctypes.create_string_buffer(query)
-        func = self.libWebKit.webkit_dom_document_evaluate
-        class GError(ctypes.Structure):
-            _fields_ = [('domain', ctypes.c_int32),
-                        ('code', ctypes.c_int),
-                        ('message', ctypes.c_char_p)]
-            
-        self.err = ctypes.POINTER(GError)()
-        print "Query ptr", queryPtr
         print "Query is ", query
-        result =  domDoc.evaluate("//*", domDoc, domDoc.create_ns_resolver(domDoc), 7, WebKit.DOMXPathResult())
+        result =  domDoc.evaluate(query, domDoc, domDoc.create_ns_resolver(domDoc), 7, WebKit.DOMXPathResult())
         
         self.lastResult = result
         
