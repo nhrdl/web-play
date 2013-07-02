@@ -120,11 +120,9 @@ class Driver(object):
         self.err = ctypes.POINTER(GError)()
         print "Query ptr", queryPtr
         print "Query is ", query
-        resolver = domDoc.create_ns_resolver(domDoc)
-        result = func(hash(domDoc), queryPtr, hash(domDoc), hash(resolver), 7, 0, ctypes.byref(self.err))
-        obj = capi.pygobject_new(result)
-        self.lastResult = obj
-        print obj
+        result =  domDoc.evaluate("//*", domDoc, domDoc.create_ns_resolver(domDoc), 7, WebKit.DOMXPathResult())
+        
+        self.lastResult = result
         
     def get_xpath_results(self, query):
         self.run_func(self._get_xpath_results, query=query)
