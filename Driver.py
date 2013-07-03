@@ -6,6 +6,9 @@ import time
 from ctypes import CDLL
 import ctypes
 
+class ElementNotFoundError(Exception):
+    pass
+
 #Thanks to http://stackoverflow.com/questions/8668333/create-python-object-from-memory-address-using-gi-repository
 class _PyGObject_Functions(ctypes.Structure):
     _fields_ = [
@@ -69,7 +72,9 @@ class Driver(object):
         return False
     
     def run_func(self, func, **args):
-        
+        time.sleep(3)
+        self.waitUntilAllFramesLoaded()
+        self.functionWaitEvent.clear()
         GLib.idle_add(self.informer_run, func, args)
         self.functionWaitEvent.wait(3*60)
                 
@@ -82,10 +87,12 @@ class Driver(object):
         for frame in self.frameList:
             if (frame.get_uri() == "about:blank"):
                 continue
-             
-            if (frame.get_dom_document().get_state() != "complete"):
-                isLoaded = False
-        
+            try:
+                if (frame.get_dom_document != None and frame.get_dom_document().get_state() != "complete"):
+                    isLoaded = False
+            except AttributeError:
+                print "No get_dom_document on frames"
+                
         return isLoaded
     
     def waitUntilAllFramesLoaded(self):
@@ -132,11 +139,37 @@ class Driver(object):
         print "Length ", result.get_snapshot_length()
         
         pass
-       
+    
+    def wait_until_text_contains(self, text): 
+        self.wait_until_xpath("//*[contains(., '" + text + "')]")
+        pass
+      
     def wait_until_text(self, text):
         self.wait_until_xpath("//*[. = '" + text + "']")
         #GLib.idle_add(self._wait_until_text, text)
-        self.waitUntilAllFramesLoaded()
         pass
         
+    def _click_element(self, args):
+        node = args["node"]
+        node.click()
         
+    def click_element(self, xpath):
+        node = self.get_single_element(xpath)
+        if (None == node):
+            raise ElementNotFoundError
+        self.run_func(self._click_element, node=node)
+        node.click()
+    
+    def get_single_element(self, xpath):
+        result = self.get_xpath_results(xpath)
+        if (result == None):
+            raise ElementNotFoundError
+        length = result.get_snapshot_length()
+        if (length == 0):
+            raise ElementNotFoundError
+        return result.snapshot_item(0)
+    
+    def set_text(self, xpath, text):
+        
+        node = self.get_single_element(xpath) 
+        node.set_value(text)    

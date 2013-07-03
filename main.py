@@ -19,6 +19,7 @@ class PyPlay:
         win = Gtk.Window()
 
         self.view = WebKit.WebView()
+        print "Using webkit version", WebKit.MAJOR_VERSION, ".", WebKit.MINOR_VERSION, ".", WebKit.MICRO_VERSION
         self.view.open("http://www.yahoo.com")
         sw = Gtk.ScrolledWindow() 
         sw.add_with_viewport(self.view) 
